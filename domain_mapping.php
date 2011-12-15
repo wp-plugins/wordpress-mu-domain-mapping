@@ -180,12 +180,14 @@ function dm_domains_admin() {
 		}
 		if ( $_POST[ 'action' ] == 'update' ) {
 			if ( preg_match( '|^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|', $_POST[ 'ipaddress' ] ) )
-				add_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
+				update_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
+
 			if ( ! preg_match( '/(--|\.\.)/', $_POST[ 'cname' ] ) && preg_match( '|^([a-zA-Z0-9-\.])+$|', $_POST[ 'cname' ] ) )
-				add_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
+				update_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
 			else
-				add_site_option( 'dm_cname', '' );
-			add_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
+				update_site_option( 'dm_cname', '' );
+
+			update_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
 		}
 	}
 
@@ -295,15 +297,15 @@ function dm_admin_page() {
 				add_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
 			if ( intval( $_POST[ 'always_redirect_admin' ] ) == 0 )
 				$_POST[ 'dm_remote_login' ] = 0; // disable remote login if redirecting to mapped domain
-			add_site_option( 'dm_remote_login', intval( $_POST[ 'dm_remote_login' ] ) );
+			update_site_option( 'dm_remote_login', intval( $_POST[ 'dm_remote_login' ] ) );
 			if ( ! preg_match( '/(--|\.\.)/', $_POST[ 'cname' ] ) && preg_match( '|^([a-zA-Z0-9-\.])+$|', $_POST[ 'cname' ] ) )
-				add_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
+				update_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
 			else
-				add_site_option( 'dm_cname', '' );
-			add_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
-			add_site_option( 'dm_redirect_admin', intval( $_POST[ 'always_redirect_admin' ] ) );
-			add_site_option( 'dm_user_settings', intval( $_POST[ 'dm_user_settings' ] ) );
-			add_site_option( 'dm_no_primary_domain', intval( $_POST[ 'dm_no_primary_domain' ] ) );
+				update_site_option( 'dm_cname', '' );
+			update_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
+			update_site_option( 'dm_redirect_admin', intval( $_POST[ 'always_redirect_admin' ] ) );
+			update_site_option( 'dm_user_settings', intval( $_POST[ 'dm_user_settings' ] ) );
+			update_site_option( 'dm_no_primary_domain', intval( $_POST[ 'dm_no_primary_domain' ] ) );
 		}
 	}
 
