@@ -294,7 +294,7 @@ function dm_admin_page() {
 				}
 			}
 			if( $ipok )
-				add_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
+				update_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
 			if ( intval( $_POST[ 'always_redirect_admin' ] ) == 0 )
 				$_POST[ 'dm_remote_login' ] = 0; // disable remote login if redirecting to mapped domain
 			update_site_option( 'dm_remote_login', intval( $_POST[ 'dm_remote_login' ] ) );
