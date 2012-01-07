@@ -620,6 +620,7 @@ function domain_mapping_post_content( $post_content ) {
 }
 
 function dm_redirect_admin() {
+	// don't redirect admin ajax calls
 	if ( strpos( $_SERVER['REQUEST_URI'], 'wp-admin/admin-ajax.php' ) !== false )
 		return;
 
@@ -706,9 +707,14 @@ function remote_logout_loader() {
 
 function redirect_to_mapped_domain() {
 	global $current_blog, $wpdb;
+
+	// don't redirect post previews
+	if ( isset( $_GET['preview'] ) && $_GET['preview'] == 'true' )
+		return;
+
 	if ( !isset( $_SERVER[ 'HTTPS' ] ) )
 		$_SERVER[ 'HTTPS' ] = 'off';
-	$protocol = ( 'on' == strtolower($_SERVER['HTTPS']) ) ? 'https://' : 'http://';
+	$protocol = ( 'on' == strtolower( $_SERVER['HTTPS'] ) ) ? 'https://' : 'http://';
 	$url = domain_mapping_siteurl( false );
 	if ( $url && $url != untrailingslashit( $protocol . $current_blog->domain . $current_blog->path ) ) {
 		$redirect = get_site_option( 'dm_301_redirect' ) ? '301' : '302';
