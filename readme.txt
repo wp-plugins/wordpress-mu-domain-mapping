@@ -1,7 +1,7 @@
 === WordPress MU Domain Mapping ===
 Contributors: donncha, wpmuguru, automattic
 Tags: wordpressmu, domain-mapping, multisite
-Tested up to: 3.2
+Tested up to: 3.3
 Stable tag: 0.5.4.2
 Requires at least: 2.9.2
 
