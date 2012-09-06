@@ -211,6 +211,7 @@ function dm_edit_domain( $row = false ) {
 		echo "<h3>" . __( 'Edit Domain', 'wordpress-mu-domain-mapping' ) . "</h3>";
 	}  else {
 		echo "<h3>" . __( 'New Domain', 'wordpress-mu-domain-mapping' ) . "</h3>";
+		$row = new stdClass();
 		$row->blog_id = '';
 		$row->domain = '';
 		$_POST[ 'domain' ] = '';
