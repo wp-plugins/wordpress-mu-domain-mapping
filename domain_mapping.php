@@ -139,9 +139,6 @@ function dm_domains_admin() {
 		wp_die( sprintf( __( "<strong>Warning!</strong> This plugin will only work if WordPress is installed in the root directory of your webserver. It is currently installed in &#8217;%s&#8217;.", "wordpress-mu-domain-mapping" ), $current_site->path ) );
 	}
 
-	switch( $_POST[ 'action' ] ) {
-		default:
-	}
 	echo '<h2>' . __( 'Domain Mapping: Domains', 'wordpress-mu-domain-mapping' ) . '</h2>';
 	if ( !empty( $_POST[ 'action' ] ) ) {
 		check_admin_referer( 'domain_mapping' );
@@ -303,10 +300,10 @@ function dm_admin_page() {
 				update_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
 			else
 				update_site_option( 'dm_cname', '' );
-			update_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
-			update_site_option( 'dm_redirect_admin', intval( $_POST[ 'always_redirect_admin' ] ) );
-			update_site_option( 'dm_user_settings', intval( $_POST[ 'dm_user_settings' ] ) );
-			update_site_option( 'dm_no_primary_domain', intval( $_POST[ 'dm_no_primary_domain' ] ) );
+			update_site_option( 'dm_301_redirect', isset( $_POST[ 'permanent_redirect' ] ) ? intval( $_POST[ 'permanent_redirect' ] ) : 0 );
+			update_site_option( 'dm_redirect_admin', isset( $_POST[ 'always_redirect_admin' ] ) ? intval( $_POST[ 'always_redirect_admin' ] ) : 0 );
+			update_site_option( 'dm_user_settings', isset( $_POST[ 'dm_user_settings' ] ) ? intval( $_POST[ 'dm_user_settings' ] ) : 0 );
+			update_site_option( 'dm_no_primary_domain', isset( $_POST[ 'dm_no_primary_domain' ] ) ? intval( $_POST[ 'dm_no_primary_domain' ] ) : 0 );
 		}
 	}
 
@@ -799,7 +796,7 @@ function remote_login_js_loader() {
 		$_SERVER[ 'HTTPS' ] = 'Off';
 	$protocol = ( 'on' == strtolower( $_SERVER[ 'HTTPS' ] ) ) ? 'https://' : 'http://';
 	$hash = get_dm_hash();
-	echo "<script src='{$protocol}{$current_site->domain}{$current_site->path}?dm={$hash}&amp;action=load&amp;blogid={$current_blog->blog_id}&amp;siteid={$current_blog->site_id}&amp;t=" . mt_rand() . "&amp;back=" . urlencode( $protocol . $current_blog->domain . $_SERVER[ 'REQUEST_URI' ] ) . "' type='text/javascript'></script>";
+	echo "<script src='//{$current_site->domain}{$current_site->path}?dm={$hash}&amp;action=load&amp;blogid={$current_blog->blog_id}&amp;siteid={$current_blog->site_id}&amp;t=" . mt_rand() . "&amp;back=" . urlencode( $protocol . $current_blog->domain . $_SERVER[ 'REQUEST_URI' ] ) . "' type='text/javascript'></script>";
 }
 
 // delete mapping if blog is deleted
