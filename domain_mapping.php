@@ -49,15 +49,6 @@ function dm_add_pages() {
 		add_management_page(__( 'Domain Mapping', 'wordpress-mu-domain-mapping'), __( 'Domain Mapping', 'wordpress-mu-domain-mapping'), 'manage_options', 'domainmapping', 'dm_manage_page' );
 	}
 
-	if ( dm_site_admin() && version_compare( $wp_version, '3.0.9', '<=' ) ) {
-		if ( version_compare( $wp_version, '3.0.1', '<=' ) ) {
-			add_submenu_page('wpmu-admin.php', __( 'Domain Mapping', 'wordpress-mu-domain-mapping' ), __( 'Domain Mapping', 'wordpress-mu-domain-mapping'), 'manage_options', 'dm_admin_page', 'dm_admin_page');
-			add_submenu_page('wpmu-admin.php', __( 'Domains', 'wordpress-mu-domain-mapping' ), __( 'Domains', 'wordpress-mu-domain-mapping'), 'manage_options', 'dm_domains_admin', 'dm_domains_admin');
-		} else {
-			add_submenu_page('ms-admin.php', __( 'Domain Mapping', 'wordpress-mu-domain-mapping' ), 'Domain Mapping', 'manage_options', 'dm_admin_page', 'dm_admin_page');
-			add_submenu_page('ms-admin.php', __( 'Domains', 'wordpress-mu-domain-mapping' ), 'Domains', 'manage_options', 'dm_domains_admin', 'dm_domains_admin');
-		}
-	}
 }
 add_action( 'admin_menu', 'dm_add_pages' );
 
@@ -678,11 +669,7 @@ if ( defined( 'DOMAIN_MAPPING' ) ) {
 	add_filter( 'template_directory_uri', 'domain_mapping_post_content' );
 	add_filter( 'plugins_url', 'domain_mapping_post_content' );
 } else {
-	if ( $wp_version == '2.9.2' ) {
-		add_filter( 'admin_url', 'domain_mapping_adminurl', 10, 2 );
-	} else {
-		add_filter( 'admin_url', 'domain_mapping_adminurl', 10, 3 );
-	}
+	add_filter( 'admin_url', 'domain_mapping_adminurl', 10, 3 );
 }	
 add_action( 'admin_init', 'dm_redirect_admin' );
 if ( isset( $_GET[ 'dm' ] ) )
@@ -706,6 +693,9 @@ function remote_logout_loader() {
 function redirect_to_mapped_domain() {
 	global $current_blog, $wpdb;
 
+	// don't redirect the main site
+	if ( is_main_site() )
+		return;
 	// don't redirect post previews
 	if ( isset( $_GET['preview'] ) && $_GET['preview'] == 'true' )
 		return;
