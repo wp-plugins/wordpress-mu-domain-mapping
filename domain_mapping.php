@@ -338,7 +338,7 @@ function dm_handle_actions() {
 	global $wpdb, $parent_file;
 	$url = add_query_arg( array( 'page' => 'domainmapping' ), admin_url( $parent_file ) );
 	if ( !empty( $_POST[ 'action' ] ) ) {
-		$domain = $wpdb->escape( $_POST[ 'domain' ] );
+		$domain = $wpdb->_escape( $_POST[ 'domain' ] );
 		if ( $domain == '' ) {
 			wp_die( "You must enter a domain" );
 		}
@@ -370,8 +370,8 @@ function dm_handle_actions() {
 				exit;
 			break;
 		}
-	} elseif( $_GET[ 'action' ] == 'delete' ) {
-		$domain = $wpdb->escape( $_GET[ 'domain' ] );
+	} elseif( isset( $_GET['action'] ) &&  $_GET[ 'action' ] == 'delete' ) {
+		$domain = $wpdb->_escape( $_GET[ 'domain' ] );
 		if ( $domain == '' ) {
 			wp_die( __( "You must enter a domain", 'wordpress-mu-domain-mapping' ) );
 		}
@@ -459,6 +459,7 @@ function dm_manage_page() {
 			if ( $details[ 'active' ] == 1 )
 				echo "checked='1' ";
 			echo "/>";
+			$details['path'] = ( isset( $details['path'] ) )? $details['path']: '';
 			$url = "{$protocol}{$details[ 'domain' ]}{$details[ 'path' ]}";
 			echo "</td><td><a href='$url'>$url</a></td><td style='text-align: center'>";
 			if ( $details[ 'domain' ] != $orig_url[ 'host' ] && $details[ 'active' ] != 1 ) {
@@ -516,7 +517,7 @@ function domain_mapping_siteurl( $setting ) {
 		$s = $wpdb->suppress_errors();
 
 		if ( get_site_option( 'dm_no_primary_domain' ) == 1 ) {
-			$domain = $wpdb->get_var( "SELECT domain FROM {$wpdb->dmtable} WHERE blog_id = '{$wpdb->blogid}' AND domain = '" . $wpdb->escape( $_SERVER[ 'HTTP_HOST' ] ) . "' LIMIT 1" );
+			$domain = $wpdb->get_var( "SELECT domain FROM {$wpdb->dmtable} WHERE blog_id = '{$wpdb->blogid}' AND domain = '" . $wpdb->_escape( $_SERVER[ 'HTTP_HOST' ] ) . "' LIMIT 1" );
 			if ( null == $domain ) {
 				$return_url[ $wpdb->blogid ] = untrailingslashit( get_original_url( "siteurl" ) );
 				return $return_url[ $wpdb->blogid ];
