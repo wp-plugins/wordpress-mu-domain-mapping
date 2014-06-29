@@ -63,6 +63,10 @@ add_action( 'network_admin_menu', 'dm_network_pages' );
 // remove_action('dm_echo_updated_msg','dm_echo_default_updated_msg');
 // add_action('dm_echo_updated_msg','my_custom_updated_msg_function');
 function dm_echo_default_updated_msg() {
+
+	if ( ! isset( $_GET[ 'updated' ] ) )
+		return;
+
 	switch( $_GET[ 'updated' ] ) {
 		case "add":
 			$msg = __( 'New domain added.', 'wordpress-mu-domain-mapping' );
@@ -131,9 +135,9 @@ function dm_domains_admin() {
 	}
 
 	echo '<h2>' . __( 'Domain Mapping: Domains', 'wordpress-mu-domain-mapping' ) . '</h2>';
-	if ( !empty( $_POST[ 'action' ] ) ) {
+	if ( ! empty( $_POST[ 'action' ] ) ) {
 		check_admin_referer( 'domain_mapping' );
-		$domain = strtolower( $_POST[ 'domain' ] );
+		$domain = isset( $_POST[ 'domain' ] ) ? strtolower( $_POST[ 'domain' ] ) : ''; 
 		switch( $_POST[ 'action' ] ) {
 			case "edit":
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->dmtable} WHERE domain = %s", $domain ) );
@@ -144,15 +148,19 @@ function dm_domains_admin() {
 				}
 			break;
 			case "save":
-				if ( $_POST[ 'blog_id' ] != 0 AND 
-					$_POST[ 'blog_id' ] != 1 AND 
+				if ( isset( $_POST[ 'blog_id' ] ) &&
+					$_POST[ 'blog_id' ] != 0 && 
+					$_POST[ 'blog_id' ] != 1 && 
 					null == $wpdb->get_var( $wpdb->prepare( "SELECT domain FROM {$wpdb->dmtable} WHERE blog_id != %d AND domain = %s", $_POST[ 'blog_id' ], $domain ) ) 
 				) {
-					if ( $_POST[ 'orig_domain' ] == '' ) {
-						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->dmtable} ( `blog_id`, `domain`, `active` ) VALUES ( %d, %s, %d )", $_POST[ 'blog_id' ], $domain, $_POST[ 'active' ] ) );
+					$orig_domain = isset( $_POST[ 'orig_domain' ] ) ? $_POST[ 'orig_domain' ] : '';
+					$active = isset( $_POST[ 'active' ] ) ? $_POST[ 'active' ] : '';
+
+					if ( $orig_domain == '' ) {
+						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->dmtable} ( `blog_id`, `domain`, `active` ) VALUES ( %d, %s, %d )", $_POST[ 'blog_id' ], $domain, $active ) );
 						echo "<p><strong>" . __( 'Domain Add', 'wordpress-mu-domain-mapping' ) . "</strong></p>";
 					} else {
-						$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->dmtable} SET blog_id = %d, domain = %s, active = %d WHERE domain = %s", $_POST[ 'blog_id' ], $domain, $_POST[ 'active' ], $_POST[ 'orig_domain' ] ) );
+						$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->dmtable} SET blog_id = %d, domain = %s, active = %d WHERE domain = %s", $_POST[ 'blog_id' ], $domain, $active, $orig_domain ) );
 						echo "<p><strong>" . __( 'Domain Updated', 'wordpress-mu-domain-mapping' ) . "</strong></p>";
 					}
 				}
@@ -167,15 +175,15 @@ function dm_domains_admin() {
 			break;
 		}
 		if ( $_POST[ 'action' ] == 'update' ) {
-			if ( preg_match( '|^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|', $_POST[ 'ipaddress' ] ) )
+			if ( isset( $_POST[ 'ipaddress' ] ) && preg_match( '|^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|', $_POST[ 'ipaddress' ] ) )
 				update_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
 
-			if ( ! preg_match( '/(--|\.\.)/', $_POST[ 'cname' ] ) && preg_match( '|^([a-zA-Z0-9-\.])+$|', $_POST[ 'cname' ] ) )
+			if ( isset( $_POST[ 'cname' ] ) && ! preg_match( '/(--|\.\.)/', $_POST[ 'cname' ] ) && preg_match( '|^([a-zA-Z0-9-\.])+$|', $_POST[ 'cname' ] ) )
 				update_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
 			else
 				update_site_option( 'dm_cname', '' );
 
-			update_site_option( 'dm_301_redirect', intval( $_POST[ 'permanent_redirect' ] ) );
+			update_site_option( 'dm_301_redirect', isset( $_POST[ 'permanent_redirect' ] ) ? intval( $_POST[ 'permanent_redirect' ] ) : 0 );
 		}
 	}
 
@@ -275,7 +283,7 @@ function dm_admin_page() {
 		check_admin_referer( 'domain_mapping' );
 		if ( $_POST[ 'action' ] == 'update' ) {
 			$ipok = true;
-			$ipaddresses = explode( ',', $_POST[ 'ipaddress' ] );
+			$ipaddresses = isset( $_POST[ 'ipaddress' ] ) ? explode( ',', $_POST[ 'ipaddress' ] ) : array();
 			foreach( $ipaddresses as $address ) {
 				if ( ( $ip = trim( $address ) ) && !preg_match( '|^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|', $ip ) ) {
 					$ipok = false;
@@ -283,10 +291,13 @@ function dm_admin_page() {
 				}
 			}
 			if( $ipok )
-				update_site_option( 'dm_ipaddress', $_POST[ 'ipaddress' ] );
-			if ( intval( $_POST[ 'always_redirect_admin' ] ) == 0 )
+				update_site_option( 'dm_ipaddress', implode( ',', $ipaddresses ) );
+
+			if ( ! isset( $_POST[ 'always_redirect_admin' ] ) || intval( $_POST[ 'always_redirect_admin' ] ) == 0 )
 				$_POST[ 'dm_remote_login' ] = 0; // disable remote login if redirecting to mapped domain
-			update_site_option( 'dm_remote_login', intval( $_POST[ 'dm_remote_login' ] ) );
+
+			update_site_option( 'dm_remote_login', isset( $_POST[ 'dm_remote_login' ] ) ? intval( $_POST[ 'dm_remote_login' ] ) : 0 );
+
 			if ( ! preg_match( '/(--|\.\.)/', $_POST[ 'cname' ] ) && preg_match( '|^([a-zA-Z0-9-\.])+$|', $_POST[ 'cname' ] ) )
 				update_site_option( 'dm_cname', stripslashes( $_POST[ 'cname' ] ) );
 			else
