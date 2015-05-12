@@ -36,6 +36,12 @@ Things to remember:
 
 == Upgrade Notice ==
 
+= 0.5.5.1 =
+* revert to 0.5.4.3 domain_mapping.php
+
+= 0.5.5 =
+* fix warnings
+
 = 0.5.4.2 =
 WordPress 3.3 compatibility, bugfixes
 Set $current_site->site_name
